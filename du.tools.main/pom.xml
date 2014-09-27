@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>du.tools.parent</artifactId>
+        <groupId>du.tools</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>du.tools.main</artifactId>
+
+    <dependencies>
+
+        <!--Import IntelliJ lib and plugin-->
+        <dependency>
+            <groupId>jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>3.4.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/jna.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>jna</groupId>
+            <artifactId>jna-utils</artifactId>
+            <version>3.4.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/jna-utils.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/guava-14.0.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>pty4j</groupId>
+            <artifactId>pty4j</artifactId>
+            <version>0.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/pty4j-0.3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>purejavacomm</groupId>
+            <artifactId>purejavacomm</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/purejavacomm.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>jediterm-pty</groupId>
+            <artifactId>jediterm-pty</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../lib/jediterm-pty-1.0.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+</project>
