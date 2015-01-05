@@ -1,11 +1,12 @@
 package du.tools.main.widgets.console;
 
-import lib.common.utils.CommonUtil;
-import lib.common.utils.IconUtil;
-import org.apache.commons.lang.StringUtils;
 import du.tools.main.ConfigAccessor;
-import du.tools.main.widgets.PView;
-import du.tools.main.widgets.console.pty.PtyTextPane;
+import du.tools.main.commons.utils.CommonUtil;
+import du.tools.main.commons.utils.IconUtil;
+import du.tools.main.widgets.console.pty.windows.PtyTextPane;
+import du.tools.main.widgets.main.PView;
+import du.tools.main.windows.WinMain;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,7 +56,7 @@ public class ProjectConsole extends JPanel {
 
         Image iIcon = IconUtil.generate("X", Color.RED, staticBg);
         Image rIcon = IconUtil.generate("X", Color.RED, hoverBg);
-        IconButton btnClose = new IconButton("Close Console", iIcon, rIcon);
+        IconButton btnClose = new IconButton("X", "Close Console", iIcon, rIcon);
         btnClose.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 parent.closeConsole();
@@ -94,7 +95,7 @@ public class ProjectConsole extends JPanel {
 
         Image iIcon = IconUtil.generate("S", Color.RED, staticBg);
         Image rIcon = IconUtil.generate("S", Color.RED, hoverBg);
-        IconButton btnStop = new IconButton("Stop execution", iIcon, rIcon);
+        IconButton btnStop = new IconButton("S", "Stop execution", iIcon, rIcon);
         btnStop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (console.isRunning()) {
@@ -114,7 +115,9 @@ public class ProjectConsole extends JPanel {
                 btn.addActionListener(new ActionListener() {
 
                     public void actionPerformed(ActionEvent e) {
-                        console.setText("");
+                        if(console.isRunning()){
+                            return;
+                        }
                         // Highlight the button clicked
                         for (Component c : btnPanel.getComponents()) {
                             if (c instanceof IconButton) {
@@ -167,9 +170,13 @@ public class ProjectConsole extends JPanel {
                             });
                             if (files == null || files.length == 0) {
                                 console.appendWithColor("\nWorking directory does not exist, please check: " + dir, Color.RED);
-                                return;
+                                int answer = JOptionPane.showConfirmDialog(WinMain.frame, "Working directory does not exist, do you want to continue?", "Working directory confirmation", JOptionPane.YES_NO_OPTION);
+                                if(answer != JOptionPane.OK_OPTION){
+                                    return;
+                                }
+                            } else {
+                                workingDir = files[0];
                             }
-                            workingDir = files[0];
                         }
 
                         // The action command of button
@@ -183,6 +190,7 @@ public class ProjectConsole extends JPanel {
                         // Execute commands
                         try {
                             if (commands.size() > 1) {
+                                console.setText("");
                                 console.runCommand(workingDir, commands.toArray(new String[]{""}));
                             }
                         } catch (IOException e1) {
@@ -204,6 +212,7 @@ public class ProjectConsole extends JPanel {
         private String toolTip;
         private ImageIcon iIcon;
         private ImageIcon rIcon;
+        private ImageIcon sIcon;
         private boolean selected;
 
         public IconButton(String name, String toolTip) {
@@ -214,7 +223,8 @@ public class ProjectConsole extends JPanel {
             init(iImg, rImg);
         }
 
-        public IconButton(String toolTip, Image iImg, Image rImg) {
+        public IconButton(String name, String toolTip, Image iImg, Image rImg) {
+            this.name = name;
             this.toolTip = toolTip;
             init(iImg, rImg);
         }
@@ -226,7 +236,7 @@ public class ProjectConsole extends JPanel {
         public void setSelected(boolean selected) {
             this.selected = selected;
             if (selected) {
-                setIcon(rIcon);
+                setIcon(sIcon);
             } else {
                 setIcon(iIcon);
             }
@@ -237,6 +247,8 @@ public class ProjectConsole extends JPanel {
         }
 
         private void init(Image iImg, Image rImg) {
+            Image sImg = IconUtil.generate(name, staticFg, hoverBg);
+            sIcon = new ImageIcon(sImg);
             iIcon = new ImageIcon(iImg);
             rIcon = new ImageIcon(rImg);
             setIcon(iIcon);

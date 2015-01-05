@@ -20,9 +20,9 @@ public class WinCodeViewer extends JFrame {
 
     private void initialize() {
         setTitle(file.getAbsolutePath());
-        setSize(1000, 800);
+        setSize(1200, 800);
         setLocationRelativeTo(WinMain.frame);
-
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         try {
             String text = FileUtils.readFileToString(file);
 
@@ -31,6 +31,7 @@ public class WinCodeViewer extends JFrame {
             textArea.setText(text);
             textArea.setSyntaxEditingStyle(getStyle());
             textArea.setCodeFoldingEnabled(true);
+            textArea.select(0 ,0);
 
             add(new RTextScrollPane(textArea));
         } catch (IOException e) {
