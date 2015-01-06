@@ -1,14 +1,19 @@
 package du.tools.main.windows;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
+import com.jediterm.pty.PtyProcessTtyConnector;
 import com.jediterm.terminal.TtyConnector;
+import com.jediterm.terminal.TtyConnectorWaitFor;
 import com.jediterm.terminal.ui.JediTermWidget;
 import com.jediterm.terminal.ui.TerminalSession;
 import com.jgoodies.looks.plastic.PlasticLookAndFeel;
+import com.pty4j.PtyProcess;
 import du.swingx.JETabbedPane;
 import du.tools.main.ConfigAccessor;
 import du.tools.main.commons.utils.CommonUtil;
 import du.tools.main.widgets.console.pty.PtySettingsProvider;
-import du.tools.main.widgets.console.pty.unix.ShellRemoteTtyConnector;
+import du.tools.main.widgets.console.pty.unix.RUnixPtyProcess;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
@@ -22,6 +27,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
 public class WinTerminalUnix extends JFrame {
 
@@ -111,14 +118,18 @@ public class WinTerminalUnix extends JFrame {
     private boolean openSession(String host, String user, String pwd) {
         if (StringUtils.isNotBlank(host)) {
             try {
+                PtySettingsProvider mySettingsProvider = new PtySettingsProvider();
                 JediTermWidget terminal = new JediTermWidget(new PtySettingsProvider());
                 if (terminal.canOpenSession()) {
-                    TtyConnector ttyConnector = new ShellRemoteTtyConnector(host, user, pwd, Charset.defaultCharset());
+                    PtyProcess process = new RUnixPtyProcess(host, user, pwd);
+                    TtyConnector ttyConnector = new PtyProcessTtyConnector(process, Charset.defaultCharset());
                     TerminalSession session = terminal.createTerminalSession(ttyConnector);
                     session.start();
 
                     consoleTabPane.addTab(user + "@" + host, terminal);
                     consoleTabPane.setSelectedIndex(consoleTabPane.getTabCount() - 1);
+
+                    regExistAction(mySettingsProvider, ttyConnector, terminal);
 
                     log.info("Opened Session {}@{} - {}", new String[]{user, host, pwd});
                     return true;
@@ -128,5 +139,34 @@ public class WinTerminalUnix extends JFrame {
             }
         }
         return false;
+    }
+
+    private int indexOfTab(JediTermWidget terminal) {
+        for (int i = 0; i < consoleTabPane.getTabCount(); i++) {
+            JediTermWidget t = (JediTermWidget) consoleTabPane.getComponentAt(i);
+            if (t == terminal) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void regExistAction(final PtySettingsProvider mySettingsProvider, final TtyConnector ttyConnector, final JediTermWidget terminal) {
+        TtyConnectorWaitFor waitFor = new TtyConnectorWaitFor(ttyConnector, Executors.newSingleThreadExecutor());
+        waitFor.setTerminationCallback(new Predicate<Integer>() {
+            public boolean apply(Integer integer) {
+                if (mySettingsProvider.shouldCloseTabOnLogout(ttyConnector)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            int index = indexOfTab(terminal);
+                            if (index != -1) {
+                                consoleTabPane.closeTabAt(index);
+                            }
+                        }
+                    });
+                }
+                return true;
+            }
+        });
     }
 }
