@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 
 public class PTree extends JPanel {
 
@@ -56,7 +57,7 @@ public class PTree extends JPanel {
             File pDir = new File(ConfigAccessor.getInstance().getLocalRepo(), path);
             boolean ind = true;
             if (!pDir.exists()) {
-                ind = cloneProject(path);
+                ind = cloneProject(path, false);
                 File xmlFile = new File(Constants.PROJECT_VIEW_DIR, path + ".xml");
                 if (!xmlFile.delete()) {
                     System.out.println("Delete file failed:" + xmlFile.getAbsoluteFile());
@@ -70,56 +71,60 @@ public class PTree extends JPanel {
         }
     }
 
-    private synchronized boolean cloneProject(String path) {
+    private synchronized boolean cloneProject(String path, boolean force) {
         String remoteRepo = ConfigAccessor.getInstance().getHostName() + ":" + path + ".git";
         String localRepo = ConfigAccessor.getInstance().getLocalRepo();
         localRepo = CommonUtil.toBackSlash(localRepo);
         localRepo = localRepo + CommonUtil.toBackSlash(path);
 
-        String message = "From: " + remoteRepo;
-        message += "\n     To: " + localRepo;
-        int answer = JOptionPane.showConfirmDialog(WinMain.frame, message, "Clone repo to local", JOptionPane.YES_NO_OPTION);
-
-        if (answer == JOptionPane.OK_OPTION) {
-            File project = new File(localRepo);
-
-            if (project.exists()) {
-                answer = JOptionPane.showConfirmDialog(WinMain.frame, "Exists in local, do you want to delete the existing repo?", "", JOptionPane.OK_CANCEL_OPTION);
-                if (answer == JOptionPane.OK_OPTION) {
-                    try {
-                        FileUtils.forceDelete(project);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        JOptionPane.showMessageDialog(WinMain.frame, "Delete directory failed, please delete manually.");
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-
-            if (!project.getParentFile().exists()) {
-                if (!project.getParentFile().mkdirs()) {
-                    setVisible(false);
-                    JOptionPane.showMessageDialog(WinMain.frame, "Creates the directory failed:" + project.getParentFile().getAbsoluteFile());
-                    return false;
-                }
-            }
-
-            String msg = new GitCommand().clone(project.getParentFile(), remoteRepo);
-            if (msg.contains("fatal:")) {
-                JOptionPane.showMessageDialog(WinMain.frame, msg);
+        if (!force) {
+            String message = "From: " + remoteRepo;
+            message += "\n     To: " + localRepo;
+            int answer = JOptionPane.showConfirmDialog(WinMain.frame, message, "Clone repo to local", JOptionPane.YES_NO_OPTION);
+            if (answer != JOptionPane.OK_OPTION) {
                 return false;
-            } else {
-                return true;
             }
         }
-        return false;
+
+        File project = new File(localRepo);
+        if (project.exists()) {
+            if (!force) {
+                int answer = JOptionPane.showConfirmDialog(WinMain.frame, "Exists in local, do you want to delete the existing repo?", "", JOptionPane.OK_CANCEL_OPTION);
+                if (answer == JOptionPane.OK_OPTION) {
+                    return false;
+                }
+            }
+
+            try {
+                FileUtils.forceDelete(project);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(WinMain.frame, "Delete directory failed, please delete manually.\n" + e.getMessage());
+                return false;
+            }
+        }
+
+        if (!project.getParentFile().exists()) {
+            if (!project.getParentFile().mkdirs()) {
+                setVisible(false);
+                JOptionPane.showMessageDialog(WinMain.frame, "Creates the directory failed:" + project.getParentFile().getAbsoluteFile());
+                return false;
+            }
+        }
+
+        String msg = new GitCommand().clone(project.getParentFile(), remoteRepo);
+        if (msg.contains("fatal:")) {
+            if (!force) {
+                JOptionPane.showMessageDialog(WinMain.frame, msg);
+            }
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    public PTreeNode getSelectedNode(){
+    public PTreeNode getSelectedNode() {
         TreePath treePath = proTree.getSelectionPath();
-        if(treePath != null){
+        if (treePath != null) {
             return (PTreeNode) treePath.getLastPathComponent();
         }
         return null;
@@ -132,7 +137,7 @@ public class PTree extends JPanel {
                 final PTreeNode node = getSelectedNode();
                 UiUtil.exe(new UiUtil.Callable() {
                     public void call() {
-                        if (cloneProject(node.getRepoPath())) {
+                        if (cloneProject(node.getRepoPath(), false)) {
                             viewProject(node, node.getRepoPath());
                         }
                     }
@@ -157,11 +162,33 @@ public class PTree extends JPanel {
             }
         });
 
+        final JMenuItem mntmCloneAll = new JMenuItem("Clone All");
+        mntmCloneAll.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                final PTreeNode node = getSelectedNode();
+                UiUtil.exe(new UiUtil.Callable() {
+                    public void call() {
+                        String errs = "Clone failures:\n";
+                        Enumeration enumeration = node.getChildren().elements();
+                        while (enumeration.hasMoreElements()) {
+                            PTreeNode n = (PTreeNode) enumeration.nextElement();
+                            if (!cloneProject(n.getRepoPath(), true)) {
+                                errs += n.getRepoPath() + "\n";
+                            }
+                        }
+                        if (errs.length() > "Clone failures:\n".length()) {
+                            JOptionPane.showMessageDialog(WinMain.frame, errs);
+                        }
+                    }
+                });
+            }
+        });
+
         proTree.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
-                    if (isRepo()) {
-                        final PTreeNode node = getSelectedNode();
+                    final PTreeNode node = getSelectedNode();
+                    if (node.isRepo()) {
                         UiUtil.exe(new UiUtil.Callable() {
                             public void call() {
                                 viewProject(node, node.getRepoPath());
@@ -181,7 +208,11 @@ public class PTree extends JPanel {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu popupMenu = new JPopupMenu();
-                if (isRepo()) {
+                PTreeNode node = getSelectedNode();
+                if (node.isProj()) {
+                    popupMenu.add(mntmCloneAll);
+                }
+                if (node.isRepo()) {
                     popupMenu.add(mntmClone);
                 }
                 popupMenu.add(mntmExpand);
@@ -189,11 +220,6 @@ public class PTree extends JPanel {
 
                 proTree.grabFocus();
                 popupMenu.show(proTree, e.getX(), e.getY());
-            }
-
-            private boolean isRepo() {
-                PTreeNode node = getSelectedNode();
-                return node.isRepo();
             }
         });
     }

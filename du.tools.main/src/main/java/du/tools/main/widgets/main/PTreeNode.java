@@ -11,7 +11,9 @@ public class PTreeNode extends DefaultMutableTreeNode {
     private Document document;
     private String xpath;
     private String repoPath;
-    private boolean isRepo;
+    private String type;
+    private final static String TYPE_PROJECT = "P";
+    private final static String TYPE_REPOSITORY = "R";
 
     public PTreeNode(Document document, String xpath) {
         this.document = document;
@@ -19,16 +21,16 @@ public class PTreeNode extends DefaultMutableTreeNode {
         userObject = XPathUtil.getString(document, xpath + "/@name");
     }
 
-    public PTreeNode(Document document, String xpath, String repoPath, boolean isRepo) {
+    public PTreeNode(Document document, String xpath, String repoPath, String type) {
         this.document = document;
         this.xpath = xpath;
         this.repoPath = repoPath;
         userObject = XPathUtil.getString(document, xpath + "/@name");
-        this.isRepo = isRepo;
+        this.type = type;
     }
 
     public boolean isLeaf() {
-        return isRepo;
+        return TYPE_REPOSITORY.equals(type);
     }
 
     public int getChildCount() {
@@ -48,7 +50,7 @@ public class PTreeNode extends DefaultMutableTreeNode {
                 children = new Vector();
                 for (int i = 0; i < count; i++) {
                     String p = cxpath + "[" + (i + 1) + "]";
-                    PTreeNode node = new PTreeNode(document, p, "/" + XPathUtil.getString(document, p + "/@key"), false);
+                    PTreeNode node = new PTreeNode(document, p, "/" + XPathUtil.getString(document, p + "/@key"), TYPE_PROJECT);
                     add(node);
                 }
             }
@@ -59,7 +61,7 @@ public class PTreeNode extends DefaultMutableTreeNode {
                 children = new Vector();
                 for (int i = 0; i < count; i++) {
                     String p = cxpath + "[" + (i + 1) + "]";
-                    PTreeNode node = new PTreeNode(document, p, repoPath + "/" + XPathUtil.getString(document, p + "/@name"), true);
+                    PTreeNode node = new PTreeNode(document, p, repoPath + "/" + XPathUtil.getString(document, p + "/@name"), TYPE_REPOSITORY);
                     add(node);
                 }
             }
@@ -71,6 +73,10 @@ public class PTreeNode extends DefaultMutableTreeNode {
     }
 
     public boolean isRepo() {
-        return isRepo;
+        return TYPE_REPOSITORY.equals(type);
+    }
+
+    public boolean isProj() {
+        return TYPE_PROJECT.equals(type);
     }
 }

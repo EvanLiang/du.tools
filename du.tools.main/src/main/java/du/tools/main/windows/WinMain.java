@@ -66,7 +66,8 @@ public class WinMain {
         busy.setBounds(x, y, 30, 30);
         busy.setBusy(true);
         busy.setVisible(false);
-        frame.getLayeredPane().add(busy, 99999);
+
+        frame.getLayeredPane().add(busy);
 
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
