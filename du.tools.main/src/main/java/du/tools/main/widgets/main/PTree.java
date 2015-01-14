@@ -90,7 +90,7 @@ public class PTree extends JPanel {
         if (project.exists()) {
             if (!force) {
                 int answer = JOptionPane.showConfirmDialog(WinMain.frame, "Exists in local, do you want to delete the existing repo?", "", JOptionPane.OK_CANCEL_OPTION);
-                if (answer == JOptionPane.OK_OPTION) {
+                if (answer != JOptionPane.OK_OPTION) {
                     return false;
                 }
             }
