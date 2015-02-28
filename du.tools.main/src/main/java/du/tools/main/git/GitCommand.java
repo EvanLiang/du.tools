@@ -1,8 +1,8 @@
 package du.tools.main.git;
 
 
-import lib.common.cmd.Command;
 import du.tools.main.ConfigAccessor;
+import du.tools.main.commons.cmd.Command;
 
 import java.io.File;
 

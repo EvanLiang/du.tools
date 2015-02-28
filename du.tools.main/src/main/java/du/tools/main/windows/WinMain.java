@@ -6,6 +6,8 @@ import du.tools.main.ConfigAccessor;
 import du.tools.main.commons.utils.CommonUtil;
 import du.tools.main.widgets.main.PMainPanel;
 import du.tools.main.widgets.main.PTreeNode;
+import du.tools.terminal.windows.WinCmdTerminal;
+import du.tools.terminal.windows.WinRemoteShellTerminal;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.slf4j.Logger;
@@ -96,14 +98,14 @@ public class WinMain {
                     log.info("Terminal - WinTerminalWindows");
                     PTreeNode node = mainPanel.getpTrees().getSelectedNode();
                     if (node != null) {
-                        log.info("WinTerminalWindows:" + node.getRepoPath());
-                        new WinTerminalWindows(ConfigAccessor.getInstance().getLocalRepo() + node.getRepoPath());
+                        log.info("WinCmdTerminal:" + node.getRepoPath());
+                        new WinCmdTerminal(ConfigAccessor.getInstance().getLocalRepo() + node.getRepoPath());
                     } else {
-                        log.info("WinTerminalWindows - ");
-                        new WinTerminalWindows();
+                        log.info("WinCmdTerminal - ");
+                        new WinCmdTerminal();
                     }
                 } catch (Exception e1) {
-                    log.info("WinTerminalWindows - ERROR");
+                    log.info("WinCmdTerminal - ERROR");
                     log.error(e1.getMessage(), e1);
                 }
             }
@@ -113,29 +115,10 @@ public class WinMain {
         menu.add(item);
         item.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                new WinTerminalUnix();
-            }
-        });
-
-        item = new JMenuItem("MQueue");
-        menu.add(item);
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
                 try {
-                    new WinMQueue();
+                    new WinRemoteShellTerminal();
                 } catch (Exception e1) {
-                    log.error(e1.getMessage(), e1);
-                }
-            }
-        });
-
-        item = new JMenuItem("Unix Explorer");
-        menu.add(item);
-        item.addActionListener(new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    new WinExplorer();
-                } catch (Exception e1) {
+                    log.info("WinRemoteShellTerminal - ERROR");
                     log.error(e1.getMessage(), e1);
                 }
             }

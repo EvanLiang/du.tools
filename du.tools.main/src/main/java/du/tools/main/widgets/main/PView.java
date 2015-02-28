@@ -7,6 +7,7 @@ import du.tools.main.commons.utils.FileToXml;
 import du.tools.main.commons.utils.UiUtil;
 import du.tools.main.commons.utils.XPathUtil;
 import du.tools.main.git.GitCommand;
+import du.tools.main.git.status.Status;
 import du.tools.main.widgets.console.ProjectConsole;
 import du.tools.main.windows.WinCodeViewer;
 import org.apache.commons.lang.StringUtils;
@@ -261,7 +262,7 @@ public class PView extends JSplitPane {
                 File file = getSelectedDir();
                 if (file != null) {
                     try {
-                        Runtime.getRuntime().exec("explorer \"" + file.getAbsolutePath() + "\"");
+                        Runtime.getRuntime().exec("sftp \"" + file.getAbsolutePath() + "\"");
                     } catch (IOException e1) {
                         JOptionPane.showMessageDialog(PView.this, "Open failed: " + e1.getMessage());
                     }

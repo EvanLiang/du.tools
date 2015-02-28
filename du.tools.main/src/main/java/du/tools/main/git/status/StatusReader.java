@@ -1,6 +1,6 @@
 package du.tools.main.git.status;
 
-import lib.common.utils.CommonUtil;
+import du.tools.main.commons.utils.CommonUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;

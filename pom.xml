@@ -7,15 +7,12 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>du.tools.main</module>
-        <module>du.tools.explorer</module>
+        <module>du.tools.sftp</module>
         <module>du.tools.terminal</module>
+        <module>du.tools.commons</module>
         <!--<module>du.tools.mq</module>-->
     </modules>
     <packaging>pom</packaging>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>
