@@ -5,11 +5,15 @@ import du.tools.commons.Utils;
 import du.tools.sftp.unix.RemoteService;
 import du.tools.sftp.widgets.unix.LExplorerPanel;
 import du.tools.sftp.widgets.unix.RExplorerPanel;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -36,7 +40,7 @@ public class WinSftpExplorer extends JFrame {
         prop = new Properties();
         File pFile = new File("sftp.properties");
         if (!pFile.exists()) {
-            prop.setProperty("connection.xx", "user:pwd@host:/home");
+            prop.setProperty("xx", "user:pwd@host:/home");
             prop.store(new FileOutputStream(pFile), "Configuration of your remote host");
             return;
         }
@@ -59,6 +63,15 @@ public class WinSftpExplorer extends JFrame {
                 return closeSession(index);
             }
         });
+        unixExplorers.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int index = unixExplorers.getSelectedIndex();
+				if (index > -1) {
+					RExplorerPanel rPanel = (RExplorerPanel) unixExplorers.getComponentAt(index);
+					lExplorerPanel.setrExplorerPanel(rPanel);
+				}
+			}
+		});
 
         addMenu();
         setVisible(true);

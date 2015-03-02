@@ -1,8 +1,13 @@
 package du.tools.commons;
 
+import java.awt.Font;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
 
 public class Utils {
 
@@ -24,4 +29,14 @@ public class Utils {
             return null;
         }
     }
+    
+    public static void initGlobalFontSetting(Font fnt) {
+		FontUIResource fontRes = new FontUIResource(fnt);
+		for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
+			Object key = keys.nextElement();
+			Object value = UIManager.get(key);
+			if (value instanceof FontUIResource)
+				UIManager.put(key, fontRes);
+		}
+	}
 }

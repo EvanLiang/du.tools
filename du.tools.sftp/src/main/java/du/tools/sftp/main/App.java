@@ -1,8 +1,12 @@
 package du.tools.sftp.main;
 
+import java.awt.Font;
+
 import com.jgoodies.looks.plastic.PlasticLookAndFeel;
+
 import du.tools.commons.Utils;
 import du.tools.sftp.windows.WinSftpExplorer;
+
 import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +20,7 @@ public class App {
         DOMConfigurator.configure(Utils.getClasspathURL("log4j.xml"));
         try {
             UIManager.setLookAndFeel(new PlasticLookAndFeel());
+            Utils.initGlobalFontSetting(Font.decode("Dialog"));
             new WinSftpExplorer().setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         } catch (Exception e) {
             e.printStackTrace();
