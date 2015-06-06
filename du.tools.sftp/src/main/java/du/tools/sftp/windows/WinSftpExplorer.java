@@ -40,6 +40,7 @@ public class WinSftpExplorer extends JFrame {
         prop = new Properties();
         File pFile = new File("sftp.properties");
         if (!pFile.exists()) {
+            prop.setProperty("local", "D:/");
             prop.setProperty("xx", "user:pwd@host:/home");
             prop.store(new FileOutputStream(pFile), "Configuration of your remote host");
             return;
@@ -54,7 +55,7 @@ public class WinSftpExplorer extends JFrame {
         setLocationRelativeTo(null);
 
         windowsExplorer = new JTabbedPane();
-        lExplorerPanel = new LExplorerPanel("D:/");
+        lExplorerPanel = new LExplorerPanel(prop.getProperty("local"));
         windowsExplorer.addTab("Local Windows", lExplorerPanel);
 
         unixExplorers = new JETabbedPane();
@@ -97,6 +98,9 @@ public class WinSftpExplorer extends JFrame {
         menuBar.add(menu);
 
         for (Object key : prop.keySet()) {
+            if("local".equals(key)){
+                continue;
+            }
             final String connection = prop.getProperty(key.toString());
             JMenuItem item = new JMenuItem(connection);
             menu.add(item);
